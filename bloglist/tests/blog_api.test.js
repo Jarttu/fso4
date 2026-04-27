@@ -41,13 +41,33 @@ describe('blog api', () => {
 
         assert.strictEqual(response.body.length, 1)
     })
-    
+
     test('blogs have id field instead of _id', async () => {
         const response = await api.get('/api/blogs')
 
         const blog = response.body[0]
         assert.ok(blog.id)
         assert.strictEqual(blog._id, undefined)
+    })
+
+    test('a valid blog can be added', async () => {
+        const newBlog = {
+            title: 'asynctest',
+            author: 'Tester',
+            url: 'http://asynctest.com',
+            likes: 3
+        }
+
+        await api
+            .post('/api/blogs')
+            .send(newBlog)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const response = await api.get('/api/blogs')
+        assert.strictEqual(response.body.length, 2)
+        const titles = response.body.map(b => b.title)
+        assert.ok(titles.includes('asynctest'))
     })
 })
 
