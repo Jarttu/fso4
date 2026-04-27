@@ -69,6 +69,20 @@ describe('blog api', () => {
         const titles = response.body.map(b => b.title)
         assert.ok(titles.includes('asynctest'))
     })
+
+    test('a blog can be deleted', async () => {
+        const responseAtStart = await api.get('/api/blogs')
+        const blogToDelete = responseAtStart.body[0]
+
+        await api
+            .delete(`/api/blogs/${blogToDelete.id}`)
+            .expect(204)
+
+        const responseAtEnd = await api.get('/api/blogs')
+        assert.strictEqual(responseAtEnd.body.length, responseAtStart.body.length - 1)
+        const ids = responseAtEnd.body.map(b => b.id)
+        assert.ok(!ids.includes(blogToDelete.id))
+    })
 })
 
 after(async () => {
