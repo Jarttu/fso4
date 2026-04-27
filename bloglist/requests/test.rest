@@ -1,1 +1,9 @@
- GET http://localhost:3003/api/users
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwiaWQiOiI2OWVmYTVmZGQ3Y2QxOTkzMmM0MmZlM2EiLCJpYXQiOjE3NzczMjAxNjB9.gUcbkgc4k9QCPSBrzNYDpdjC4Xc84GTkHbVD8vQqeNc
+
+{
+  "title": "secure blog",
+  "author": "me",
+  "url": "http://example.com"
+}

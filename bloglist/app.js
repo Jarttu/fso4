@@ -1,12 +1,25 @@
+require('dotenv').config()
+
 const express = require('express')
 const Blog = require('./models/blog')
 const usersRouter = require('./controllers/users')
 const User = require('./models/user')
+const loginRouter = require('./controllers/login')
+const jwt = require('jsonwebtoken')
+
+const getTokenFrom = request => {
+    const authorization = request.get('authorization')
+    if (authorization && authorization.startsWith('Bearer ')) {
+        return authorization.replace('Bearer ', '')
+    }
+    return null
+}
 
 const app = express()
 
 app.use(express.json())
 
+app.use('/api/login', loginRouter)
 app.use('/api/users', usersRouter)
 
 app.get('/api/blogs', async (request, response) => {
@@ -16,7 +29,20 @@ app.get('/api/blogs', async (request, response) => {
 
 app.post('/api/blogs', async (request, response) => {
     const body = request.body
-    const user = await User.findById(body.userId)
+
+    const token = getTokenFrom(request)
+    
+    if (!token) {
+        return response.status(401).json({ error: 'token missing' })
+    }
+
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+
+    if (!decodedToken.id) {
+        return response.status(401).json({ error: 'token invalid' })
+    }
+
+    const user = await User.findById(decodedToken.id)
 
     const blog = new Blog({
         title: body.title,
