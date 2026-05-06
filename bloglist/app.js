@@ -63,5 +63,28 @@ app.delete('/api/blogs/:id', async(request, response) => {
     response.status(204).end()
 
 })
+app.put('/api/blogs/:id', async(request, response) => {
+    const body = request.body
+
+    const updatedBlog = { 
+        title: body.title,
+        author: body.author,
+        url: body.url,
+        likes: body.likes,
+        user: body.user
+    }
+    const result = await Blog.findByIdAndUpdate(
+        request.params.id, 
+        updatedBlog, 
+        { returnDocument: 'after' }
+    )
+    
+    const populated = await result.populate('user', {
+        username: 1,
+        name: 1 
+    })
+
+    response.json(populated)
+})
 
 module.exports = app
