@@ -6,6 +6,7 @@ const usersRouter = require('./controllers/users')
 const User = require('./models/user')
 const loginRouter = require('./controllers/login')
 const jwt = require('jsonwebtoken')
+const testingRouter = require('./controllers/testing')
 
 const getTokenFrom = request => {
     const authorization = request.get('authorization')
@@ -86,5 +87,10 @@ app.put('/api/blogs/:id', async(request, response) => {
 
     response.json(populated)
 })
+
+if (process.env.NODE_ENV === 'test') {
+    app.use('/api/testing', testingRouter)
+}
+
 
 module.exports = app
