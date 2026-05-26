@@ -32,7 +32,7 @@ app.post('/api/blogs', async (request, response) => {
     const body = request.body
 
     const token = getTokenFrom(request)
-    
+
     if (!token) {
         return response.status(401).json({ error: 'token missing' })
     }
@@ -49,14 +49,18 @@ app.post('/api/blogs', async (request, response) => {
         title: body.title,
         author: body.author,
         url: body.url,
-        likes: body.likes,
+        likes: body.likes || 0,
         user: user._id
     })
 
     const savedBlog = await blog.save()
     user.blogs = user.blogs.concat(savedBlog._id)
     await user.save()
-    response.status(201).json(savedBlog)
+    const populatedBlog = await savedBlog.populate('user', {
+        username: 1,
+        name: 1
+    })
+    response.status(201).json(populatedBlog)
 })
 
 app.delete('/api/blogs/:id', async(request, response) => {
@@ -72,7 +76,7 @@ app.put('/api/blogs/:id', async(request, response) => {
         author: body.author,
         url: body.url,
         likes: body.likes,
-        user: body.user
+        user: body.user?.id || body.user
     }
     const result = await Blog.findByIdAndUpdate(
         request.params.id, 
@@ -89,7 +93,9 @@ app.put('/api/blogs/:id', async(request, response) => {
 })
 
 if (process.env.NODE_ENV === 'test') {
+    const testingRouter = require('./controllers/testing')
     app.use('/api/testing', testingRouter)
+    console.log('TEST MODE ENABLED')
 }
 
 
